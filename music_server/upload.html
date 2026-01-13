@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Upload Nhạc</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; background: #f4f4f4; }
+        form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input { width: 95%; margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        button { width: 100%; padding: 12px; background: #1DB954; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #1aa34a; }
+        #status { margin-top: 15px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center;">Thêm Bài Hát Mới</h2>
+    <form id="uploadForm">
+        <label>Tên bài hát:</label>
+        <input type="text" id="title" placeholder="VD: Chúng ta của hiện tại" required>
+        
+        <label>Ca sĩ:</label>
+        <input type="text" id="artist" placeholder="VD: Sơn Tùng MTP" required>
+        
+        <label>Ảnh bìa (JPG/PNG):</label>
+        <input type="file" id="imageFile" accept="image/*" required>
+        
+        <label>File Nhạc (MP3):</label>
+        <input type="file" id="songFile" accept="audio/*" required>
+        
+        <button type="submit">UPLOAD NGAY</button>
+    </form>
+    <p id="status"></p>
+
+    <script>
+        document.getElementById('uploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('status');
+            status.innerText = "⏳ Đang xử lý... (Vui lòng đợi 5-10s)";
+            status.style.color = "orange";
+
+            const formData = new FormData();
+            formData.append('title', document.getElementById('title').value);
+            formData.append('artist', document.getElementById('artist').value);
+            // Gửi 2 file
+            formData.append('imageFile', document.getElementById('imageFile').files[0]);
+            formData.append('songFile', document.getElementById('songFile').files[0]);
+
+            try {
+                const res = await fetch('http://localhost:3000/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    status.innerText = "✅ Thành công! Đã thêm: " + data.song.title;
+                    status.style.color = "green";
+                    document.getElementById('uploadForm').reset(); // Xóa form làm bài mới
+                } else {
+                    const text = await res.text();
+                    throw new Error(text);
+                }
+            } catch (err) {
+                status.innerText = "❌ Lỗi: " + err.message;
+                status.style.color = "red";
+            }
+        };
+    </script>
+</body>
+</html>
