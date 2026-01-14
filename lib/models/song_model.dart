@@ -13,14 +13,25 @@ class Song {
     required this.audioUrl,
   });
 
-  // Hàm này giúp biến đổi dữ liệu JSON từ Server thành dạng Song của Flutter
   factory Song.fromJson(Map<String, dynamic> json) {
     return Song(
-      id: json['_id'] ?? '', // MongoDB dùng _id thay vì id
-      title: json['title'] ?? 'Không tên',
-      artist: json['artist'] ?? 'Unknown',
-      imageUrl: json['imageUrl'] ?? 'https://via.placeholder.com/150',
-      audioUrl: json['audioUrl'] ?? '',
+      // 👇 Ưu tiên lấy _id (của MongoDB), nếu không có thì lấy id, nếu không có nữa thì là rỗng
+      id: (json['_id'] ?? json['id'] ?? "").toString(),
+      title: json['title'] ?? "Unknown Title",
+      artist: json['artist'] ?? "Unknown Artist",
+      imageUrl: json['imageUrl'] ?? "https://via.placeholder.com/150",
+      audioUrl: json['audioUrl'] ?? "",
     );
+  }
+
+  // Khi gửi lên Server, ta gửi kèm _id để Server biết đây là bài nào
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id, // Quan trọng: Gửi đúng key _id
+      'title': title,
+      'artist': artist,
+      'imageUrl': imageUrl,
+      'audioUrl': audioUrl,
+    };
   }
 }
